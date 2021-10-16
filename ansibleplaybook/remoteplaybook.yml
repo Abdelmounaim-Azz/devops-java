@@ -1,0 +1,25 @@
+---
+- name: Update machines
+  hosts: all
+  tasks:
+  - name: Copy Dockerfile into QA machine
+    ansible.builtin.copy:
+      src: Dockerfile
+      dest: .
+  - name: Copy webapp file into QA machine
+    ansible.builtin.copy:
+      src: webapp.war
+      dest: .
+  - name: Stop running container
+    command: docker stop tomcat-server
+    ignore_errors: True
+  - name: Remove Stopped container
+    command: docker rm tomcat-server
+    ignore_errors: True
+  - name: Remove the image
+    command: docker rmi tomcat-server
+    ignore_errors: True
+  - name: Build Image from Dockerfile
+    command: docker build -t tomcat-server .
+  - name: Create and run container
+    command: docker run -d -p 8080:8080 --name tomcat-server tomcat-server
